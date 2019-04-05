@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/mrhjkim/gke-jx-quickstart:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/mrhjkim/gke-jx-quickstart:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: gke-jx-quickstart
+        chartPath: charts/gke-jx-quickstart
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/mrhjkim/gke-jx-quickstart'
+          image.tag: '{{.DIGEST_HEX}}'
